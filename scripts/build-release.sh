@@ -26,7 +26,7 @@ mkdir -p "${DEST}"
 
 # Ship the plugin itself plus the two files users expect in a source drop.
 # Repo scaffolding (update.json, scripts, CONTRIBUTING, git metadata) stays behind.
-cp -r "${ROOT}/src" "${ROOT}/resources" "${ROOT}/plugin.json" "${ROOT}/README.md" "${ROOT}/LICENSE" "${DEST}/"
+cp -r "${ROOT}/src" "${ROOT}/resources" "${ROOT}/plugin.json" "${ROOT}/README.md" "${DEST}/"
 
 python3 - "${DEST}/plugin.json" <<'PY'
 import json, sys
