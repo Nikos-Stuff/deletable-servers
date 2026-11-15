@@ -11,5 +11,7 @@
         "server"
     ],
     "panel_version": "^1.0.0-beta35",
-    "api_version": 1
+    "api_version": 1,
+    "url": "https://github.com/Nikos-Stuff/deletable-servers",
+    "update_url": "https://raw.githubusercontent.com/Nikos-Stuff/deletable-servers/main/update.json"
 }
