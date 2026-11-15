@@ -1,6 +1,6 @@
 {
     "*": {
         "version": "1.1.2",
-        "download_url": "https://github.com/Nikos-Stuff/pelican-plugin/releases/latest/download/delete-server.zip"
+        "download_url": "https://github.com/Nikos-Stuff/deletable-servers/releases/latest/download/delete-server.zip"
     }
 }
