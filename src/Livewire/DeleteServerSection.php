@@ -4,6 +4,7 @@ namespace NikosStuff\DeleteServerPlugin\Livewire;
 
 use App\Models\Server;
 use App\Services\Servers\ServerDeletionService;
+use Closure;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -11,15 +12,18 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use NikosStuff\DeleteServerPlugin\Services\FreeTierGuard;
 
-class DeleteServerSection extends Component implements HasActions
+class DeleteServerSection extends Component implements HasActions, HasSchemas
 {
     use InteractsWithActions;
+    use InteractsWithSchemas;
 
     #[Locked]
     public int $serverId = 0;
@@ -27,6 +31,7 @@ class DeleteServerSection extends Component implements HasActions
     public function mount(): void
     {
         $tenant = Filament::getTenant();
+
         $this->serverId = $tenant instanceof Server ? $tenant->id : 0;
     }
 
@@ -44,26 +49,20 @@ class DeleteServerSection extends Component implements HasActions
             ->schema([
                 TextInput::make('confirm_name')
                     ->label(trans('delete-server::strings.action.confirm_label'))
-                    ->required(),
+                    ->required()
+                    ->rule(fn (): Closure => function (string $attribute, $value, Closure $fail) {
+                        if ($value !== $this->getServer()?->name) {
+                            $fail(trans('delete-server::strings.action.name_mismatch'));
+                        }
+                    }),
             ])
-            ->action(function () {
-                $deletionService = app(ServerDeletionService::class);
+            ->action(function (ServerDeletionService $deletionService) {
                 $server = $this->getServer();
 
                 if (! $server || ! $this->canDelete(fresh: true)) {
                     Notification::make()
                         ->title(trans('delete-server::strings.notifications.not_allowed_title'))
                         ->body(trans('delete-server::strings.notifications.not_allowed_body'))
-                        ->danger()
-                        ->send();
-
-                    return;
-                }
-
-                $data = $this->mountedActionsData[0] ?? [];
-                if (($data['confirm_name'] ?? '') !== $server->name) {
-                    Notification::make()
-                        ->title(trans('delete-server::strings.action.name_mismatch'))
                         ->danger()
                         ->send();
 
@@ -94,6 +93,9 @@ class DeleteServerSection extends Component implements HasActions
             });
     }
 
+    /**
+     * Owner or root admin, AND the server must be on the free tier.
+     */
     public function canDelete(bool $fresh = false): bool
     {
         $server = $this->getServer();
