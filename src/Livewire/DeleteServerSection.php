@@ -46,7 +46,8 @@ class DeleteServerSection extends Component implements HasActions
                     ->label(trans('delete-server::strings.action.confirm_label'))
                     ->required(),
             ])
-            ->action(function (ServerDeletionService $deletionService) {
+            ->action(function () {
+                $deletionService = app(ServerDeletionService::class);
                 $server = $this->getServer();
 
                 if (! $server || ! $this->canDelete(fresh: true)) {
@@ -59,7 +60,6 @@ class DeleteServerSection extends Component implements HasActions
                     return;
                 }
 
-                // Form data is available on the component when the action actually runs
                 $data = $this->mountedActionsData[0] ?? [];
                 if (($data['confirm_name'] ?? '') !== $server->name) {
                     Notification::make()
