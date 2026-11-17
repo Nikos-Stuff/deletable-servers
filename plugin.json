@@ -2,7 +2,7 @@
     "id": "delete-server",
     "name": "Delete Server",
     "author": "Niko",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Adds a Delete Server section to the server Settings page. Only available for free-tier servers (checked against the hosting orders database) and only to the server owner or root admins.",
     "category": "plugin",
     "namespace": "NikosStuff\\DeleteServerPlugin",
