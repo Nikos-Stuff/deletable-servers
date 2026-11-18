@@ -7,7 +7,10 @@
     If that block can't be found (different panel version / hidden), we fall back to rendering
     the card in place (bottom of the page) so it never disappears.
 
-    Self-heal: when the Settings form re-renders (toggling a switch, editing an input, ...) the
+    Keep-alive: a Livewire `morph.removing` hook skips removal of our card, so normally it is
+    never dropped at all.
+
+    Self-heal (fallback): when the Settings form re-renders (toggling a switch, editing an input, ...) the
     panel's DOM morph throws away nodes it doesn't know about, including our teleported card.
     A MutationObserver notices that the card is gone (or no longer sits right before the
     Notifications block) and re-creates it by toggling `placed`.
@@ -26,6 +29,23 @@
 
             if (! this.hasTarget) {
                 return;
+            }
+
+            // Primary fix: tell Livewire's DOM morph to leave our card alone, so it is never
+            // removed (no flicker / layout jump). Registered once per page load; it only
+            // ever matches our own card. The observer below is the fallback.
+            if (! window.__deleteServerKeepCard && window.Livewire && typeof window.Livewire.hook === 'function') {
+                window.__deleteServerKeepCard = true;
+
+                try {
+                    window.Livewire.hook('morph.removing', ({ el, skip }) => {
+                        if (el && el.hasAttribute && el.hasAttribute('data-delete-server-card') && typeof skip === 'function') {
+                            skip();
+                        }
+                    });
+                } catch (e) {
+                    window.__deleteServerKeepCard = false;
+                }
             }
 
             this.observer = new MutationObserver(() => {
